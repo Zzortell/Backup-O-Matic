@@ -12,4 +12,4 @@ Scenario: Simple backup
 		"""
 	When I run "bin/backup"
 	Then I should have a file "backups/tosave"
-	Then Remove dir "tmp"
+	Then Remove current dir

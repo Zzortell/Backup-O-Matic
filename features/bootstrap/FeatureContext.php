@@ -1,24 +1,26 @@
 <?php
 
+require_once 'vendor/autoload.php';
+
 use Behat\Behat\Context\ClosuredContextInterface,
     Behat\Behat\Context\TranslatedContextInterface,
     Behat\Behat\Context\BehatContext,
     Behat\Behat\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode,
     Behat\Gherkin\Node\TableNode;
-
-//
-// Require 3rd-party libraries here:
-//
-//   require_once 'PHPUnit/Autoload.php';
-//   require_once 'PHPUnit/Framework/Assert/Functions.php';
-//
+use Zz\BackupOMatic\Utils\FilesAndFolders as Utils;
 
 /**
  * Features context.
  */
 class FeatureContext extends BehatContext
 {
+    protected $utils;
+    
+    public function __construct () {
+        $this->utils = new Utils;
+    }
+    
     /**
      * @Given /^I am in "([^"]*)"$/
      */
@@ -66,10 +68,13 @@ class FeatureContext extends BehatContext
     }
     
     /**
-     * @Then /^Remove dir "([^"]*)"$/
+     * @Then /^Remove current dir$/
      */
-    public function removeDir($dir)
+    public function removeCurrentDir()
     {
-        rmdir($dir);
+        $dir = getcwd();
+        chdir('..');
+        
+        $this->utils->delete($dir);
     }
 }
