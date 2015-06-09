@@ -7,7 +7,7 @@ Scenario: Simple backup
 	And I have a Yaml config file:
 		"""
 		Files:
-			- tosave
+		    - tosave
 		Backup Directory: backups
 		"""
 	When I run "bin/backup"
