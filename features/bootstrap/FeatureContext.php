@@ -24,9 +24,10 @@ class FeatureContext extends BehatContext
      */
     public function iAmIn($dir)
     {
-        if ( !chdir($dir) ) {
-            throw new Exception('Fail to change PHP\'s current dir to: '.$dir);
+        if ( !file_exists($dir) ) {
+            mkdir($dir);
         }
+        chdir($dir);
     }
 
     /**
@@ -62,5 +63,13 @@ class FeatureContext extends BehatContext
         if ( !file_exists($file) ) {
             throw new Exception('The file '.$file.' doesn\'t exist.');
         }
+    }
+    
+    /**
+     * @Then /^Remove dir "([^"]*)"$/
+     */
+    public function removeDir($dir)
+    {
+        rmdir($dir);
     }
 }
