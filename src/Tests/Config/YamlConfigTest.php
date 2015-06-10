@@ -15,10 +15,10 @@ class YamlConfigTest extends \PHPUnit_Framework_TestCase
         
         $files = [];
         foreach ( $config->getFiles() as $file ) {
-            $files[$file->getPath()] = $file->getAlt();
+            $files[] = [ $file->getPath(), $file->getAlt() ];
         }
-        $this->assertEquals($files, $filesResult);
-		$this->assertEquals($config->getDir(), $dirResult);
+        $this->assertEquals($filesResult, $files);
+		$this->assertEquals($dirResult, $config->getDir());
 	}
     
     public function ymlProvider ()
@@ -32,7 +32,7 @@ Files:
 Backup Directory: testsDir
 YML
                 ,
-                [ 'superFile' => null, 'otherFile' => 'alt' ],
+                [ [ 'superFile', null ], [ 'otherFile', 'alt' ] ],
                 'testsDir'
             ],
             
@@ -45,7 +45,7 @@ Files:
 Backup Directory: dir
 YML
                 ,
-                [ 'folder/superFile' => null, 'folder/otherFile' => 'alt' ],
+                [ [ 'folder/superFile', null ], [ 'folder/otherFile', 'alt' ] ],
                 'dir'
             ],
             
@@ -62,10 +62,10 @@ Backup Directory: dir
 YML
                 ,
                 [
-                    'folder/superFile' => null,
-                    'folder/otherFile' => 'alt',
-                    'folder2/superFile' => null,
-                    'folder2/otherFile' => 'alt'
+                    [ 'folder/superFile',  null  ],
+                    [ 'folder/otherFile',  'alt' ],
+                    [ 'folder2/superFile', null  ],
+                    [ 'folder2/otherFile', 'alt' ]
                 ],
                 'dir'
             ],
@@ -73,7 +73,27 @@ YML
             [
                 <<<'YML'
 Files:
-    - complex: Complex
+    - 42
+    - 42: 7
+    - 7:
+        - 7
+        - 42: 42
+Backup Directory: 42
+YML
+                ,
+                [
+                    [ '42',    null ],
+                    [ '42',    '7'  ],
+                    [ '7/7',   null ],
+                    [ '7/42',  '42' ],
+                ],
+                '42'
+            ],
+            
+            [
+                <<<'YML'
+Files:
+    - complex: ic
     - simple
     - folder:
         - superFile
@@ -83,21 +103,21 @@ Files:
         - otherFile: alt
         - folder3:
             - folder
-#           - 42: poc
+            - 42: poc
             - time
 Backup Directory: dir
 YML
                 ,
                 [
-                    'complex' => 'Complex',
-                    'simple' => null,
-                    'folder/superFile' => null,
-                    'folder/otherFile' => 'alt',
-                    'superfolder2/superFile' => null,
-                    'superfolder2/otherFile' => 'alt',
-                    'superfolder2/folder3/folder' => null,
-                    // 'superfolder2/folder3/42' => poc,
-                    'superfolder2/folder3/time' => null,
+                    [ 'complex', 'ic' ],
+                    [ 'simple',  null ],
+                    [ 'folder/superFile', null  ],
+                    [ 'folder/otherFile', 'alt' ],
+                    [ 'superfolder2/superFile',         null    ],
+                    [ 'superfolder2/otherFile',         'alt'   ],
+                    [ 'superfolder2/folder3/folder',    null    ],
+                    [ 'superfolder2/folder3/42',        'poc'   ],
+                    [ 'superfolder2/folder3/time',      null    ],
                 ],
                 'dir'
             ],

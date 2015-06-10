@@ -3,6 +3,7 @@
 namespace Zz\BackupOMatic\Config;
 
 use Symfony\Component\Yaml\Yaml;
+use Zz\BackupOMatic\Exception\InvalidYamlFileException;
 use Zz\BackupOMatic\Exception\InvalidYamlConfigException;
 
 class YamlConfig extends Config
@@ -11,61 +12,76 @@ class YamlConfig extends Config
 		try {
             $config = Yaml::parse($yml);
         } catch ( \Symfony\Component\Yaml\Exception\ParseException $e ) {
-        	throw new InvalidYamlConfigException('The Yaml file contains errors:' . PHP_EOL . "\t" . $e->getMessage());
-        } catch ( \Exception $e ) {
-            throw new \InvalidArgumentException('Unable to parse the Yaml file.', null, $e);
+        	throw new InvalidYamlFileException($e);
         }
         
-        $this->validateNodeContent($config['Files']);
+        $this->validate($config);
 		
-		$config['Files'] = $this->format($config['Files']);
+		$files = $this->read($config['Files']);
 		
-		parent::__construct($config);
+		parent::__construct($files, (string)$config['Backup Directory']);
 	}
 	
-	protected function format ( $nodeContent ) {
-		$formatted = [];
+	protected function read ( $nodeContent ) {
+		$files = [];
 		foreach ( $nodeContent as $child ) {
 			switch ( true ) {
-				case $this->isSingleEntry($child) :
-					$formatted[] = $child;
+				case $this->isSimpleEntry($child) :
+					$files[] = new File ((string)$child);
 				break;
 				case $this->isSingletonEntry($child) :
-					$formatted[key($child)] = current($child);
+					$files[] = new File ((string)key($child), (string)current($child));
 				break;
 				case $this->isNodeEntry($child) :
-					$parent = key($child) . '/';
-					$child[key($child)] = $this->format(current($child));
-					foreach ( current($child) as $key => $value ) {
-						switch ( true ) {
-							case $this->isSimpleEntry($key, $value) :
-								$formatted[] = $parent . $value;
-							break;
-							case $this->isComplexEntry($key, $value) :
-								$formatted[$parent.$key] = $value;
-							break;
-							default:
-								throw new \LogicException();
-						}
+					$childFiles = $this->read(current($child));
+					foreach ( $childFiles as $childFile ) {
+						$childFile->setPath(key($child) . '/' . $childFile->getPath());
+						$files[] = $childFile;
 					}
 				break;
 				default:
 					throw new \LogicException();
-					
 			}
 		}
 		
-		return $formatted;
+		return $files;
 	}
 	
-	protected function validateNodeContent ( Array $nodeContent ) {
+	protected function validate ( array $config ) {
+		$requiredKeys = [ 'Files', 'Backup Directory' ];
+		foreach ( $requiredKeys as $key ) {
+			if ( !array_key_exists($key, $config) ) {
+				throw new InvalidYamlConfigException('the key "' . $key . '" is required');
+			}
+		}
+		
+		foreach ( array_keys($config) as $key ) {
+			switch ( $key ) {
+				case 'Files' :
+					$this->validateNodeContent($config['Files']);
+				break;
+				case 'Backup Directory' :
+					if ( !(
+						is_string($config['Backup Directory'])
+						|| is_int($config['Backup Directory'])
+					)) {
+						throw new InvalidYamlConfigException('the value "Backup Directory" has to be a string (or an int)');
+					}
+				break;
+				default:
+					throw new InvalidYamlConfigException('the key "' . $key . '" doesn\'t exist');
+			}
+		}
+	}
+	
+	protected function validateNodeContent ( array $nodeContent ) {
 		foreach ( $nodeContent as $child ) {
 			if ( !(
-				$this->isSingleEntry($child)
+				$this->isSimpleEntry($child)
 				|| $this->isSingletonEntry($child)
 				|| $this->isNodeEntry($child)
 			)) {
-				throw new InvalidYamlConfigException('The Yaml config is not valid: malformed files hierarchy.');
+				throw new InvalidYamlConfigException('malformed files hierarchy');
 			}
 			
 			if ( $this->isNodeEntry($child) ) {
@@ -74,16 +90,20 @@ class YamlConfig extends Config
 		}
 	}
 	
-	protected function isSingleEntry ( $single ) {
-		return is_string($single);
+	protected function isSimpleEntry ( $simple ) {
+		return is_string($simple) || is_int($simple);
 	}
 	
 	protected function isSingletonEntry ( $singleton ) {
-		return is_array($singleton) && count($singleton) === 1
-				&& is_string(key($singleton)) && is_string(current($singleton));
+		return 	is_array($singleton) && count($singleton) === 1
+				&& (is_string(key($singleton)) 		|| is_int(key($singleton)))
+				&& (is_string(current($singleton)) 	|| is_int(current($singleton)))
+		;
 	}
 	
 	protected function isNodeEntry ( $node ) {
-		return is_array($node) && is_string(key($node)) && is_array(current($node));
+		return 	is_array($node) && (is_string(key($node)) || is_int(key($node)))
+				&& is_array(current($node))
+		;
 	}
 }
