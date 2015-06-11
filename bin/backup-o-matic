@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Zz\BackupOMatic\Command\BackupCommand;
+
+$application = new Application('Backup-O-Matic', 'dev');
+$application->setDispatcher(new EventDispatcher);
+$application->add(new BackupCommand);
+$application->run();

@@ -35,9 +35,17 @@ class FeatureContext extends BehatContext
     /**
      * @Given /^I have a file "([^"]*)"$/
      */
-    public function iHaveAFile($file)
+    public function iHaveAFile($filename)
     {
-        touch($file);
+        touch($filename);
+    }
+    
+    /**
+     * @Given /^I have a heavy file "([^"]*)"$/
+     */
+    public function iHaveAHeavyFile($filename)
+    {
+        file_put_contents($filename, str_pad('', pow(2, 30), 'X'));
     }
 
     /**
