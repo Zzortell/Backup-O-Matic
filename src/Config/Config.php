@@ -22,6 +22,12 @@ class Config
 		$this->dir = $dir;
 	}
 	
+	public function checkFilesExist () {
+		foreach ( $this->getFiles() as $file ) {
+			$file->checkExists();
+		}
+	}
+	
 	public function getFiles () {
 		return $this->files;
 	}

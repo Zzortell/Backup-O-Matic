@@ -2,6 +2,8 @@
 
 namespace Zz\BackupOMatic\Config;
 
+use Zz\BackupOMatic\Exception\InvalidConfigException;
+
 class File
 {
 	protected $path;
@@ -12,6 +14,12 @@ class File
 		$this->setPath($path);
 		if ( $alt !== null ) {
 			$this->setAlt($alt);
+		}
+	}
+	
+	public function checkExists () {
+		if ( !file_exists($this->getPath()) ) {
+			throw new InvalidConfigException('The file "' . $this->getPath() . '" doesn\'t exist');
 		}
 	}
 	
