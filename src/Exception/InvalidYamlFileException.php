@@ -4,13 +4,24 @@ namespace Zz\BackupOMatic\Exception;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 
-class InvalidYamlFileException extends \InvalidArgumentException implements ExceptionInterface
+class InvalidYamlFileException extends InvalidArgumentException
 {
-	protected $parse_exception;
+	protected $parseException;
+	protected $problem = 'Invalid Yaml file';
 	
-	public function __construct ( ParseException $parse_exception )
+	public function __construct ( ParseException $parseException )
 	{
-		$this->parse_exception($parse_exception);
-		parent::__construct('Invalid Yaml file:' . PHP_EOL . "\t" . $this->parse_exception->getMessage());
+		$this->setParseException($parseException);
+		parent::__construct('');
+	}
+	
+	public function setParseException ( ParseException $parseException )
+	{
+		$this->parseException = $parseException;
+	}
+	
+	protected function setMessage ()
+	{
+		$this->message = $this->problem . ':' . PHP_EOL . "\t" . $this->parseException->getMessage();
 	}
 }
