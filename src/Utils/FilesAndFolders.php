@@ -7,7 +7,7 @@ class FilesAndFolders
 	/**
 	 * Delete all files and folders
 	 */
-	public function delete ( $path )
+	public static function delete ( $path )
 	{
 		if ( is_dir($path) ) {
 			$files = new \RecursiveIteratorIterator(

@@ -39,14 +39,6 @@ class FeatureContext extends BehatContext
     {
         touch($filename);
     }
-    
-    /**
-     * @Given /^I have a heavy file "([^"]*)"$/
-     */
-    public function iHaveAHeavyFile($filename)
-    {
-        file_put_contents($filename, str_pad('', pow(2, 30), 'X'));
-    }
 
     /**
      * @Given /^I have a Yaml config file:$/
