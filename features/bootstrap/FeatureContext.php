@@ -22,6 +22,17 @@ class FeatureContext extends BehatContext
     }
     
     /**
+     * @AfterScenario
+     */
+    public function removeCurrentDir()
+    {
+        $dir = getcwd();
+        chdir('..');
+        
+        $this->utils->delete($dir);
+    }
+    
+    /**
      * @Given /^I am in "([^"]*)"$/
      */
     public function iAmIn($dir)
@@ -38,6 +49,16 @@ class FeatureContext extends BehatContext
     public function iHaveAFile($filename)
     {
         touch($filename);
+    }
+    
+    /**
+     * @Given /^I have a folder "([^"]*)"$/
+     */
+    public function iHaveAFolder($folder)
+    {
+        if ( !file_exists($folder) ) {
+            mkdir($folder);
+        }
     }
 
     /**
@@ -63,18 +84,24 @@ class FeatureContext extends BehatContext
     public function iShouldHaveAFile($file)
     {
         if ( !file_exists($file) ) {
-            throw new Exception('The file '.$file.' doesn\'t exist.');
+            throw new \Exception('The file '.$file.' doesn\'t exist.');
         }
     }
     
     /**
-     * @Then /^Remove current dir$/
+     * @Then /^I should have a folder matching "([^"]*)"$/
      */
-    public function removeCurrentDir()
+    public function iShouldHaveAFolderMatching($pattern)
     {
-        $dir = getcwd();
-        chdir('..');
+        $found = false;
+        foreach ( scandir('.') as $file ) {
+            if ( preg_match($pattern, $file) && is_dir($file) ) {
+                $found = true;
+            }
+        }
         
-        $this->utils->delete($dir);
+        if ( !$found ) {
+            throw new \Exception('None folder found, matching "'.$pattern.'".');
+        }
     }
 }
