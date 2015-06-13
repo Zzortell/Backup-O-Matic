@@ -34,6 +34,10 @@ class BackupOMaticTest extends \PHPUnit_Framework_TestCase
         
         $config = new YamlConfig ($yml);
         foreach ( $config->getFiles() as $file ) {
+            $dir = dirname($file->getPath());
+            if ( !file_exists($dir) ) {
+                mkdir($dir, 0777, true);
+            }
         	touch($file->getPath());
         }
     	
@@ -54,6 +58,8 @@ class BackupOMaticTest extends \PHPUnit_Framework_TestCase
     		[<<<'YML'
 Files:
     - file
+    - folder/folder:
+        - file
 Backup Directory: backup
 YML
 			],
