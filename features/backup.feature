@@ -49,3 +49,14 @@ Scenario: Backup dir's date templating
 		"""
 	When I run "../bin/backup-o-matic backup"
 	Then I should have a folder matching "#^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}_backup$#"
+	
+Scenario: Security failure
+	Given I have a file "tosave"
+	And I have a Yaml config file:
+		"""
+		Files:
+		    - tosave
+		Backup Directory: backups
+		"""
+	And I have a file "backups/tosave"
+	Then I should get an error by running "../bin/backup-o-matic backup"

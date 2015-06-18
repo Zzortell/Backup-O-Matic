@@ -77,6 +77,22 @@ class FeatureContext extends BehatContext
     {
         exec($command);
     }
+    
+    /**
+     * @Then /^I should get an error by running "([^"]*)"$/
+     */
+    public function iShouldGetAnErrorByRunning($command)
+    {
+        $error = false;
+        try {
+            $this->iRun($command);
+        } catch ( \Exception $e ) {
+            $error = true;
+        }
+        if ( !$error ) {
+            throw new \Exception('None error has been thrown.');
+        }
+    }
 
     /**
      * @Then /^I should have a file "([^"]*)"$/
