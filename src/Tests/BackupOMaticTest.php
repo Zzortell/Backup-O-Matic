@@ -28,7 +28,7 @@ class BackupOMaticTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider ymlProvider
      */
-    public function test ( $yml )
+    public function testFilesBackup ( $yml )
     {
         $config = new YamlConfig ($yml);
         foreach ( $config->getFiles() as $file ) {
@@ -45,6 +45,47 @@ class BackupOMaticTest extends \PHPUnit_Framework_TestCase
         foreach ( $config->getFiles() as $file ) {
         	$this->assertTrue(file_exists($config->getDir() . '/' . $file));
         }
+    }
+    
+    /**
+     * @dataProvider ymlProvider
+     */
+    public function testFolderBackup ( $yml )
+    {
+        $config = new YamlConfig ($yml);
+        foreach ( $config->getFiles() as $folder ) {
+            $dir = $folder->getParentDir();
+            if ( !$dir->exists() ) {
+                mkdir($dir, 0777, true);
+            }
+            if ( !$folder->exists() ) {
+                mkdir($folder);
+            }
+            touch($folder . '/a');
+            touch($folder . '/b');
+        }
+        
+        $backupOMatic = new BackupOMatic;
+        $backupOMatic->backup($config);
+        
+        foreach ( $config->getFiles() as $folder ) {
+            $this->assertTrue(file_exists($config->getDir() . '/' . $folder . '/a'));
+            $this->assertTrue(file_exists($config->getDir() . '/' . $folder . '/b'));
+        }
+    }
+    
+    public function ymlProvider ()
+    {
+        return [
+            [<<<'YML'
+Files:
+    - file
+    - folder/folder:
+        - file
+Backup Directory: backup
+YML
+            ],
+        ];
     }
     
     /**
@@ -107,20 +148,6 @@ YML
         chmod('backup/file', 0555);
         
         $backupOMatic->backup($config);
-    }
-    
-    public function ymlProvider ()
-    {
-    	return [
-    		[<<<'YML'
-Files:
-    - file
-    - folder/folder:
-        - file
-Backup Directory: backup
-YML
-			],
-    	];
     }
     
     /**
