@@ -32,18 +32,18 @@ class BackupOMaticTest extends \PHPUnit_Framework_TestCase
     {
         $config = new YamlConfig ($yml);
         foreach ( $config->getFiles() as $file ) {
-            $dir = dirname($file->getPath());
-            if ( !file_exists($dir) ) {
+            $dir = $file->getParentDir();
+            if ( !$dir->exists() ) {
                 mkdir($dir, 0777, true);
             }
-        	touch($file->getPath());
+        	touch($file);
         }
     	
         $backupOMatic = new BackupOMatic;
         $backupOMatic->backup($config);
         
         foreach ( $config->getFiles() as $file ) {
-        	$this->assertTrue(file_exists($config->getDir() . DIRECTORY_SEPARATOR . $file->getPath()));
+        	$this->assertTrue(file_exists($config->getDir() . '/' . $file));
         }
     }
     
@@ -69,7 +69,7 @@ YML
     
     /**
      * @expectedException               Zz\BackupOMatic\Exception\FailureCopyingException
-     * @expectedExceptionMessageRegExp  #The folder "." is not writable#
+     * @expectedExceptionMessageRegExp  #The folder ".+" is not writable#
      */
     public function testFolderNotWritableHandling ()
     {
@@ -134,7 +134,7 @@ Backup Directory: backup
 YML;
     	$config = new YamlConfig ($yml);
         foreach ( $config->getFiles() as $file ) {
-        	file_put_contents($file->getPath(), str_pad('', pow(2, 30), 'X'));
+        	file_put_contents($file, str_pad('', pow(2, 30), 'X'));
         }
         
     	$this->test($yml);

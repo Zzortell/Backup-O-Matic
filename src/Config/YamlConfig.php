@@ -35,8 +35,7 @@ class YamlConfig extends Config
 				case $this->isNodeEntry($child) :
 					$childFiles = $this->read(current($child));
 					foreach ( $childFiles as $childFile ) {
-						$childFile->setPath(key($child) . '/' . $childFile->getPath());
-						$files[] = $childFile;
+						$files[] = new File (key($child) . '/' . $childFile, $childFile->getAlt());
 					}
 				break;
 				default:

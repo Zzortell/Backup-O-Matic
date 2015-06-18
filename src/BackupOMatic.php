@@ -6,6 +6,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Zz\BackupOMatic\Event\BackupOMaticProgressEvent;
 use Zz\BackupOMatic\Config\Config;
 use Zz\BackupOMatic\Exception\FailureCopyingException;
+use Zz\BackupOMatic\Util\FileInfo;
 
 class BackupOMatic
 {
@@ -31,33 +32,32 @@ class BackupOMatic
 		$config->checkFilesExist();
 		
 		foreach ( $config->getFiles() as $file ) {
-			$toRead = $file->getPath();
-			$toWrite = $config->getDir() . DIRECTORY_SEPARATOR . $file->getPath();
+			$toWrite = new FileInfo ($config->getDir() . '/' . $file);
 			
-			if ( !is_readable($toRead) ) {
-				throw new FailureCopyingException('The file "' . $toRead . '" is not readable');
+			if ( !$file->isReadable() ) {
+				throw new FailureCopyingException('The file "' . $file . '" is not readable');
 			}
 			
-			if ( file_exists($toWrite) ) {
-				if ( !is_writable($toWrite) ) {
+			if ( $toWrite->exists() ) {
+				if ( !$toWrite->isWritable() ) {
 					throw new FailureCopyingException('The file "' . $toWrite . '" is not writable');
 				}
 			} else {
-				$dirToWrite = dirname($toWrite);
-				while ( !file_exists($dirToWrite) ) {
-					$dirToWrite = dirname($dirToWrite);
+				$dirToWrite = $toWrite->getParentDir();
+				while ( !$dirToWrite->exists() ) {
+					$dirToWrite = $dirToWrite->getParentDir();
 				}
 				
-				if ( !is_writable($dirToWrite) ) {
+				if ( !$dirToWrite->isWritable() ) {
 					throw new FailureCopyingException('The folder "' . $dirToWrite . '" is not writable');
 				}
 				
-				if ( !file_exists(dirname($toWrite)) ) {
-					mkdir(dirname($toWrite), 0777, true);
+				if ( !$toWrite->getParentDir()->exists() ) {
+					mkdir($toWrite->getParentDir(), 0777, true);
 				}
 			}
 			
-			if ( !copy($toRead, $toWrite) ) {
+			if ( !copy($file, $toWrite) ) {
 				throw new FailureCopyingException('An issue happened');
 			}
 			

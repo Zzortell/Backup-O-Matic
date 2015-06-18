@@ -15,7 +15,7 @@ class YamlConfigTest extends \PHPUnit_Framework_TestCase
         
         $files = [];
         foreach ( $config->getFiles() as $file ) {
-            $files[] = [ $file->getPath(), $file->getAlt() ];
+            $files[] = [ $file->getPathname(), $file->getAlt() ];
         }
         $this->assertEquals($filesResult, $files);
 		$this->assertEquals($dirResult, $config->getDir());

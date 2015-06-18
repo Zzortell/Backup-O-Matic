@@ -17,9 +17,9 @@ class FilesAndFolders
 			foreach ( $files as $file ) {
 				if ( !in_array($file->getBasename(), array('.', '..')) ) {
 					if ( $file->isDir() ) {
-						rmdir($file->getPathName());
+						rmdir($file);
 					} elseif ( $file->isFile() || $file->isLink() ) {
-						unlink($file->getPathname());
+						unlink($file);
 					}
 				}
 			}
