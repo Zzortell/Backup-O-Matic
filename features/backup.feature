@@ -33,7 +33,7 @@ Scenario: Complex selector
 	And I have a Yaml config file:
 		"""
 		Files:
-		    - *
+		    - "*"
 		Backup Directory: backups
 		"""
 	When I run "../bin/backup-o-matic backup"
@@ -44,7 +44,7 @@ Scenario: Backup dir's date templating
 	And I have a Yaml config file:
 		"""
 		Files:
-		    - *
+		    - "*"
 		Backup Directory: %date:"Y-m-d_H-i"%_backup
 		"""
 	When I run "../bin/backup-o-matic backup"

@@ -27,15 +27,15 @@ class YamlConfig extends Config
 		foreach ( $nodeContent as $child ) {
 			switch ( true ) {
 				case $this->isSimpleEntry($child) :
-					$files[] = new File ((string)$child);
+					$files[] = new FileSelector ((string)$child);
 				break;
 				case $this->isSingletonEntry($child) :
-					$files[] = new File ((string)key($child), (string)current($child));
+					$files[] = new FileSelector ((string)key($child), (string)current($child));
 				break;
 				case $this->isNodeEntry($child) :
 					$childFiles = $this->read(current($child));
 					foreach ( $childFiles as $childFile ) {
-						$files[] = new File (key($child) . '/' . $childFile, $childFile->getAlt());
+						$files[] = new FileSelector (key($child) . '/' . $childFile, $childFile->getAlt());
 					}
 				break;
 				default:

@@ -9,16 +9,22 @@ class Config
 	
 	public function __construct ( array $files, $dir ) {
 		foreach ( $files as $file ) {
-			if ( ! $file instanceof File ) {
-				throw new \InvalidArgumentException('$files must be instances of Zz\BackupOMatic\Config\File in Config::__construct');
+			if ( $file instanceof File ) {
+				$this->files[] = $file;
+			} elseif ( $file instanceof FileSelector ) {
+				$this->files = array_merge($this->files, $file->selectFiles());
+			} else {
+				throw new \InvalidArgumentException(
+					'$files must be instances of Zz\BackupOMatic\Config\File '
+					. 'or Zz\BackupOMatic\Config\FileSelector in ' . __METHOD__
+				);
 			}
 		}
 		
 		if ( !is_string($dir) ) {
-			throw new \InvalidArgumentException('$dir must be a string in Config::__construct');
+			throw new \InvalidArgumentException('$dir must be a string in ' . __METHOD__);
 		}
 		
-		$this->files = $files;
 		$this->dir = $dir;
 	}
 	
